@@ -119,9 +119,18 @@ function addPlotData(data, Plotly) {
         hoverText.push(data["Feature"][i] + "<br>" + data["Description"][i]);
     }
     
+    if (data["plotNegativeScore"] == true) {
+        // If plotNegativeScore is true, invert the scores for plotting
+        xdata = data["Score"].map(function(score) {
+            return -score; // Invert the score
+        });
+    } else {
+        xdata = data["Score"];
+    }
+    
     // Create a simple bar chart
     var barChart = {
-        x: data["Score"],
+        x: xdata,
         y: data["Row"],
         type: 'scatter',
         mode: 'markers',
@@ -336,6 +345,7 @@ function processData(data) {
    var descField = "Description";
     if (!data["Description"] && data["Desc"]) {
         descField = "Desc";
+        data["plotNegativeScore"] = true;// for Class Neighbors plot negative, but show positive in table
     }
     
     var feature_objects = [];
