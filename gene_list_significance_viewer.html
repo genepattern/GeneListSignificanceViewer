@@ -12,10 +12,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <title>Feature Summary Viewer</title>
+    <title>Gene List Significance Viewer</title>
 
     <!-- Load require.js -->
-    <script data-main="js/feature_summary_viewer" src="js/require.js"></script>
+    <script data-main="js/gene_list_significance_viewer" src="js/require.js"></script>
 
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css" href="css/jquery-ui.css"/>
@@ -24,7 +24,7 @@
     <link rel="stylesheet" type="text/css" href="js/DataTables/datatables.min.css"/>
 
     <!-- PredictionResultsViewer CSS -->
-    <link rel="stylesheet" type="text/css" href="css/feature_summary_viewer.css">
+    <link rel="stylesheet" type="text/css" href="css/gene_list_significance_viewer.css">
 
     <!-- Font Awesome CSS from CDN-->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -63,14 +63,18 @@
 
 <div id="plot-div"></div>
 
+<div id="middle-div" style="padding-top:25px;padding-bottom:20px;">
+    
+</div>
 
 <div id="table-div" style="display: none;">
     <table class="display">
         <thead>
             <tr>
-                <th>Feature Name</th>
+                <th>Row</th>
+                <th>Feature</th>
                 <th>Description</th>
-                <th>Count</th>
+                <th>Score</th>
             </tr>
         </thead>
         <tbody></tbody>

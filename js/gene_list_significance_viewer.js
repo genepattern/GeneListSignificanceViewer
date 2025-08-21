@@ -40,25 +40,30 @@ function addTableData(data, callThreshold) {
     var tbody = table_div.find("tbody");
 
     // Loop
-    for (var i = 0; data["Feature Name"].length > i; i++) {
-        var sample = data["Feature Name"][i];
-        var true_class = data["Description"][i];
-        var predicted_class = data["Count"][i];
+    for (var i = 0; data["Feature"].length > i; i++) {
+        var rank = data["Row"][i];
+        var feature = data["Feature"][i];
+        var description = data["Description"][i];
+        var score = data["Score"][i];
         
 
         var row = $("<tr>");
 
         row.append(
             $("<td></td>")
-                .append(sample)
+                .append(rank)
         );
         row.append(
             $("<td></td>")
-                .append(true_class)
+                .append(feature)
         );
         row.append(
             $("<td></td>")
-                .append(predicted_class)
+                .append(description)
+        );
+        row.append(
+            $("<td></td>")
+                .append(score)
         );
      
 
@@ -77,14 +82,16 @@ function addPlotData(data, Plotly) {
 
     var layout = {
         xaxis: {
-            title: "Feature Name",
+            title: "Score",
             showgrid: true,
-            showline: true
+            showline: true,
+            zeroline: false
         },
         yaxis: {
-            title: "Count",
+            title: "Gene Rank",
             showgrid: true,
-            showline: true
+            showline: true,
+            zeroline: false
         },
         margin: {
             l: 70,
@@ -107,12 +114,22 @@ function addPlotData(data, Plotly) {
         showTips: true
     };
 
+    var hoverText = [];
+    for (var i = 0; i < data["Feature"].length; i++) {
+        hoverText.push(data["Feature"][i] + "<br>" + data["Description"][i]);
+    }
+    
     // Create a simple bar chart
     var barChart = {
-        x: data["Feature Name"],
-        y: data["Count"],
-        type: 'bar',
-        text: data["Description"],
+        x: data["Score"],
+        y: data["Row"],
+        type: 'scatter',
+        mode: 'markers',
+        marker: {
+            size: 10,
+            color: 'rgba(255, 0, 0, 0.7)'
+        },
+        text: hoverText ,
         hoverinfo: 'x+y+text'
     };
 
@@ -120,10 +137,6 @@ function addPlotData(data, Plotly) {
     var plot_data = [barChart];
     Plotly.newPlot('plot-div', plot_data, layout, config);
     
-    document.getElementById('plot-div').on('plotly_click', function(data) {
-        var featureName = data.points[0].x;
-        highlightTableRow(featureName, Plotly); // Pass Plotly to the function
-    });
     
     setTimeout(function() {
         var plotSVG = $("#plot-div").find(".main-svg:first");
@@ -134,36 +147,67 @@ function addPlotData(data, Plotly) {
     }, 10);
 }
 
-function highlightTableRow(featureName, plotlyObj) {
-    // Search for the feature in the table and toggle its selection
-    var found = false;
-    $("#table-div tbody tr").each(function() {
-        var rowFeatureName = $(this).find("td:first").text().trim();
-        if (rowFeatureName === featureName) {
-            // Toggle the selected class
-            $(this).toggleClass("selected");
-            found = true;
+function displaySummary(data) {
+    // Find the middle div
+    const middleDiv = document.getElementById('middle-div');
 
-            // If this row isn't visible (due to pagination), use search instead
-            if (!$(this).is(":visible")) {
-                var searchField = $("#table-div_filter input");
-                searchField.val(featureName).trigger("keyup");
-            }
+    // Clear any existing content
+    middleDiv.innerHTML = '';
 
-            // Scroll to the row if needed
-            $(this)[0].scrollIntoView({behavior: "smooth", block: "center"});
-            return false; // Break the loop
-        }
-    });
+    // Create table element
+    const summaryTable = document.createElement('table');
+    summaryTable.style.width = '80%';
+    summaryTable.style.margin = '0 auto'; // Center the table
+    summaryTable.style.borderCollapse = 'collapse';
+    summaryTable.style.border = '1px solid #ddd';
 
-    // Get all selected feature names
-    var selectedFeatures = [];
-    $("#table-div tbody tr.selected").each(function() {
-        selectedFeatures.push($(this).find("td:first").text().trim());
-    });
+    // Create header row with title spanning 2 columns
+    const headerRow = document.createElement('tr');
+    const headerCell = document.createElement('th');
+    headerCell.textContent = 'Summary';
+    headerCell.colSpan = 2;
+    headerCell.style.textAlign = 'center';
+    headerCell.style.border = '1px solid #ddd';
+    headerCell.style.padding = '8px';
+    headerRow.appendChild(headerCell);
+    summaryTable.appendChild(headerRow);
+
+    // Add row for Select Method and Gene Name
+    const row1 = document.createElement('tr');
     
-    // Update plot highlighting
-    updatePlotHighlighting(selectedFeatures, plotlyObj);
+    const cell1 = document.createElement('td');
+    cell1.innerHTML = 'Select Method:  ' + data.MarkerSelectionMethod;
+    cell1.style.border = '1px solid #ddd';
+    cell1.style.padding = '8px';
+    
+    const cell2 = document.createElement('td');
+    cell2.innerHTML = 'Gene Name:  ' + data.GeneName;
+    cell2.style.border = '1px solid #ddd';
+    cell2.style.padding = '8px';
+    
+    row1.appendChild(cell1);
+    row1.appendChild(cell2);
+    summaryTable.appendChild(row1);
+
+    // Add row for Distance Function and Num Neighbors
+    const row2 = document.createElement('tr');
+    
+    const cell3 = document.createElement('td');
+    cell3.innerHTML = 'Distance Function:  ' + data.DistanceFunction;
+    cell3.style.border = '1px solid #ddd';
+    cell3.style.padding = '8px';
+    
+    const cell4 = document.createElement('td');
+    cell4.innerHTML = 'Num Neighbors:  ' + data.NumNeighbors;
+    cell4.style.border = '1px solid #ddd';
+    cell4.style.padding = '8px';
+    
+    row2.appendChild(cell3);
+    row2.appendChild(cell4);
+    summaryTable.appendChild(row2);
+
+    // Add the table to the middle div
+    middleDiv.appendChild(summaryTable);
 }
 
 function addDownloadButton() {
@@ -220,14 +264,15 @@ function triggerDownload (imgURI) {
     });
 
     var a = document.createElement('a');
-    a.setAttribute('download', 'PredictionResults.png');
+    a.setAttribute('download', 'GeneListSignificanceResults.png');
     a.setAttribute('href', imgURI);
     a.setAttribute('target', '_blank');
 
     a.dispatchEvent(evt);
 }
 
-// Function to add selection functionality to the table and update the chart
+
+// Update the selection functionality to store row numbers correctly
 function addSelectionFunctionality(Plotly) {
     // Add CSS for selected rows
     $("<style>")
@@ -240,19 +285,19 @@ function addSelectionFunctionality(Plotly) {
         // Toggle selected class
         $(this).toggleClass("selected");
 
-        // Get all selected feature names
-        var selectedFeatures = [];
+        // Get all selected row numbers (ranks)
+        var selectedRows = [];
         $("#table-div tbody tr.selected").each(function() {
-            selectedFeatures.push($(this).find("td:first").text().trim());
+            selectedRows.push(parseInt($(this).find("td:first").text().trim()));
         });
 
-        // Update plot highlighting - pass Plotly to the function
-        updatePlotHighlighting(selectedFeatures, Plotly);
+        // Update plot highlighting
+        updatePlotHighlighting(selectedRows, Plotly);
     });
 }
 
-// Update the plot to highlight selected bars
-function updatePlotHighlighting(selectedFeatures, Plotly) {
+// Fix the plot highlighting function to correctly match row numbers
+function updatePlotHighlighting(selectedRows, Plotly) {
     // Get the plot div
     var plotDiv = document.getElementById('plot-div');
 
@@ -261,58 +306,74 @@ function updatePlotHighlighting(selectedFeatures, Plotly) {
 
     // Access the plot data correctly
     var plotData = plotDiv._fullData[0];
-    var xValues = plotData.x;
+    var yValues = plotData.y; // These are the row numbers (ranks)
 
-    // Create new colors array
-    var colors = [];
-    for (var i = 0; i < xValues.length; i++) {
-        if (selectedFeatures.includes(xValues[i])) {
-            colors.push('rgba(255, 165, 0, 0.8)'); // Highlighted color (orange)
-        } else {
-            colors.push('rgba(31, 119, 180, 0.7)'); // Default color
+    // Create horizontal line shapes for selected rows
+    var shapes = [];
+    for (var i = 0; i < yValues.length; i++) {
+        if (selectedRows.includes(yValues[i])) {
+            shapes.push({
+                type: 'line',
+                x0: 0,
+                x1: 1,
+                xref: 'paper',
+                y0: yValues[i],
+                y1: yValues[i],
+                line: {
+                    color: 'yellow',
+                    width: 4,
+                    opacity: 0.9
+                }
+            });
         }
     }
 
-    // Update the marker colors
-    Plotly.restyle('plot-div', {'marker.color': [colors]});
+    // Update the plot layout with new shapes
+    Plotly.relayout('plot-div', {shapes: shapes});
 }
 
 function processData(data) {
-   
+   var descField = "Description";
+    if (!data["Description"] && data["Desc"]) {
+        descField = "Desc";
+    }
+    
     var feature_objects = [];
-    for (var i = 0; data["Feature Name"].length > i; i++) {
+    for (var i = 0; data["Feature"].length > i; i++) {
         feature_objects.push({
-            "Feature Name": data["Feature Name"][i],
-            "Count": data["Count"][i],
-            "Description": data["Description"][i]
+            "Row": i,
+            "Feature": data["Feature"][i],
+            "Score": data["Score"][i],
+             "Description": data[descField] ? data[descField][i] : ""
         });
     }
 
-    // Sort objects by modified confidence
+    // Sort objects by row
     feature_objects.sort(function(a, b) {
-        if (a.Count < b.Count) return 1;
-        if (a.Count > b.Count) return -1;
+        if (a.Row > b.Row) return 1;
+        if (a.Row < b.Row) return -1;
         // If counts are equal, sort by Feature Name
-        return a["Feature Name"].localeCompare(b["Feature Name"]);
+        return 0;
     });
 
     // Create new arrays and assign back to data
     var features = [];
     var descriptions = [];
-    var counts =[];
+    var scores =[];
+    var rows =[];
   
     for (var i = 0; feature_objects.length > i; i++) {
         var obj = feature_objects[i];
-        features.push(obj["Feature Name"]);
+        features.push(obj["Feature"]);
         descriptions.push(obj["Description"]);
-        counts.push(obj["Count"]);
+        scores.push(obj["Score"]);
+        rows.push(i)
     }
-    data["Feature Name"] = features;
+    data["Feature"] = features;
     data["Description"] = descriptions;
-    data["Count"] = counts;
+    data["Score"] = scores;
+    data["Row"] = rows;
     
-    
-
     return data;
 }
 
@@ -322,15 +383,15 @@ requirejs(["jquery", "plotly", "gp_util", "gp_lib", "DataTables/datatables.min",
     var requestParams = gpUtil.parseQueryString();
 
     // Verify necessary input
-    if (requestParams["feature.filename"] === undefined) {
+    if (requestParams["inputfilename"] === undefined) {
         // Show error message
         $("#error-message")
-            .append("Required input <i>feature.filename</i> not defined.")
+            .append("Required input <i>inputfilename</i> not defined.")
             .dialog();
         return;
     }
 
-    var url = requestParams["feature.filename"][0];
+    var url = requestParams["inputfilename"][0];
 
     // Load the prediction results ODF
     loadOdfFile({
@@ -338,7 +399,7 @@ requirejs(["jquery", "plotly", "gp_util", "gp_lib", "DataTables/datatables.min",
         gpLib: gpLib,
         success: function(raw_data) {
             // Parse the data
-            var data = gpLib.parseODF(raw_data, "Prediction Features");
+            var data = gpLib.parseODF(raw_data, "Gene List");
 
             // Process the data
             data = processData(data);
@@ -348,15 +409,15 @@ requirejs(["jquery", "plotly", "gp_util", "gp_lib", "DataTables/datatables.min",
 
             // Assemble the plot
             addPlotData(data, Plotly, 0);
-
+            displaySummary(data) 
            
             // Assemble the table
             addTableData(data, 0);
             $("#table-div table").DataTable({
                 "pageLength": 50,
                 "order": [
-                    [2, "desc"], // Primary sort: Count column in descending order
-                    [0, "asc"]   // Secondary sort: Feature Name column in ascending order
+                   
+                    [0, "asc"]   // sort by the first column (Row) in ascending order
                 ]
             });
             addSelectionFunctionality(Plotly);

@@ -4,7 +4,7 @@ LSID=urn\:lsid\:broad.mit.edu\:cancer.software.genepattern.module.visualizer\:00
 version=Rewrite as javascript
 
 author=Joshua Gould, reimplemented in js by Ted Liefeld (UC San Diego, Broad Institute)
-commandLine=gene_list_signifcance_viewer.html ? <inputfilename>
+commandLine=gene_list_significance_viewer.html ? <inputfilename>
 cpuType=any
 description=Views the results of marker analysis
 fileFormat=

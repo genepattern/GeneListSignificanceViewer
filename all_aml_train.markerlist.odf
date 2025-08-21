@@ -1,0 +1,61 @@
+ODF 1.0
+HeaderLines= 9
+Model= Gene List
+COLUMN_NAMES:Feature	Description	Score
+COLUMN_TYPES:String	String	float
+COLUMN_DESCS:Name of the gene.	Description of the gene.	Distance from reference gene.
+MarkerSelectionMethod= Continuous
+GeneName= J02973_rna1_at
+DistanceFunction= Pearson
+NumNeighbors= 50
+DataLines= 50
+J02973_rna1_at	THBD gene extracted from Human thrombomodulin gene	0.0
+X57579_s_at	Activin beta-A subunit (exon 2)	0.19008762
+X65977_at	DEFA4 Defensin, alpha 4, corticostatin 	0.19181734
+D14826_s_at	CREM CAMP responsive element modulator	0.1929782
+U77396_at	LPS-Induced TNF-Alpha Factor (LITAF) mRNA	0.20721668
+U45976_at	Clathrin assembly protein lymphoid myeloid leukemia (CALM) mRNA	0.22710395
+X16706_at	FOS-RELATED ANTIGEN 2	0.2615947
+S68271_s_at	CREM CAMP responsive element modulator	0.2647953
+L08177_at	CMKBR7 Chemokine (C-C) receptor 7	0.2682162
+U57592_at	Jumonji putative protein (jumonji) mRNA	0.26896375
+M79463_s_at	PML Probable transcription factor PML {alternative products}	0.27476364
+X06614_at	Receptor of retinoic acid	0.28192806
+U40369_rna1_at	Spermidine/spermine N1-acetyltransferase (SSAT) gene	0.28635246
+X53800_s_at	GRO3 GRO3 oncogene	0.2869892
+M26602_at	DEFA1 Defensin, alpha 1, myeloid-related sequence 	0.30000383
+J03040_at	SPARC SPARC/osteonectin	0.30901313
+M32315_at	TNFR2 Tumor necrosis factor receptor 2 (75kD)	0.31023842
+L13943_at	GK Glycerol kinase	0.33318543
+L22075_at	Guanine nucleotide regulatory protein (G13) mRNA	0.34023476
+M31516_s_at	DAF Decay accelerating factor for complement (CD55, Cromer blood group system)	0.3426001
+AFFX-HUMISGF3A/M97935_MB_at	AFFX-HUMISGF3A/M97935_MB_at (endogenous control)	0.34400553
+L06633_at	Transcription factor mRNA	0.3514318
+U49436_at	EIF5 Eukaryotic translation initiation factor 5 (eIF5)	0.35302913
+U19247_rna1_s_at	Interferon-gamma receptor alpha chain gene	0.35875392
+Y12393_s_at	RPLP2 Hemoglobin, beta	0.36325306
+M30703_s_at	Amphiregulin (AR) gene	0.36409467
+M55543_at	INTERFERON-INDUCED GUANYLATE-BINDING PROTEIN 2	0.3654123
+Y00339_s_at	CA2 Carbonic anhydrase II	0.36575627
+U03090_at	Ca2+-dependent phospholipase A2 mRNA	0.36677814
+U43916_s_at	B4B	0.37165016
+X55668_at	PRTN3 Proteinase 3 (serine proteinase, neutrophil, Wegener granulomatosis autoantigen)	0.3805743
+J03909_at	GAMMA-INTERFERON-INDUCIBLE PROTEIN IP-30 PRECURSOR	0.38253343
+X17094_at	PACE Paired basic amino acid cleaving enzyme (furin, membrane associated receptor protein)	0.38764828
+X60673_rna1_at	AK3 mRNA for adenylate kinase 3	0.3891701
+M57731_s_at	GRO2 GRO2 oncogene	0.39061213
+AFFX-HUMISGF3A/M97935_MA_at	AFFX-HUMISGF3A/M97935_MA_at (endogenous control)	0.3925045
+M58603_at	NFKB1 Nuclear factor of kappa light polypeptide gene enhancer in B-cells 1 (p105)	0.39977175
+U31628_at	IL15RA Interleukin 15 receptor alpha chain	0.40396577
+AFFX-HUMISGF3A/M97935_5_at	AFFX-HUMISGF3A/M97935_5_at (endogenous control)	0.40482754
+U58096_at	TSPY Testis specific protein, Y-linked	0.40726513
+U90918_at	Clone 23654 mRNA sequence	0.41205573
+HG3085-HT3254_s_at	Phosphodiesterase	0.41777974
+M95610_at	COL9A2 Collagen, type IX, alpha 2	0.4185208
+U07225_at	P2U nucleotide receptor mRNA	0.41870874
+X54150_at	FCAR Fc fragment of IgA, receptor for	0.42200786
+X02419_rna1_s_at	UPA gene	0.4243095
+U79734_at	Huntingtin interacting protein (HIP1) mRNA	0.42847127
+X54489_rna1_at	Melanoma growth stimulatory activity (MGSA)	0.43162543
+U12767_at	Mitogen induced nuclear orphan receptor (MINOR) mRNA	0.43291795
+L09230_s_at	CMKBR1 Chemokine (C-C) receptor 1	0.4356864
