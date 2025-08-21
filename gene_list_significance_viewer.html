@@ -1,0 +1,86 @@
+<!--
+  ~ Copyright 2025 The Regents of the University of California
+  ~ SOFTWARE COPYRIGHT NOTICE
+  ~ This software and its documentation are the copyright of the Regents of the University of California, Inc. All rights are reserved.
+  ~
+  ~ This software is supplied without any warranty or guaranteed support whatsoever. The Regents of the University of California are not responsible for its use, misuse, or functionality.
+  -->
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>Feature Summary Viewer</title>
+
+    <!-- Load require.js -->
+    <script data-main="js/feature_summary_viewer" src="js/require.js"></script>
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui.css"/>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="js/DataTables/datatables.min.css"/>
+
+    <!-- PredictionResultsViewer CSS -->
+    <link rel="stylesheet" type="text/css" href="css/feature_summary_viewer.css">
+
+    <!-- Font Awesome CSS from CDN-->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        width: 100%;
+      }
+      
+      #plot-div {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      /* Fix table width */
+      #table-div {
+        width: 100%;
+        overflow-x: hidden;
+      }
+      
+      #table-div table {
+        width: 100% !important;
+      }
+    </style>
+    
+</head>
+
+<body>
+
+<div id="error-message"></div>
+
+<div id="loading" style="display: none;"><img src="ajax.gif"></div>
+
+<div id="plot-div"></div>
+
+
+<div id="table-div" style="display: none;">
+    <table class="display">
+        <thead>
+            <tr>
+                <th>Feature Name</th>
+                <th>Description</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+</body>
+</html>
+
+
+
+
+

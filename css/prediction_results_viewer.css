@@ -1,0 +1,53 @@
+#plot-div {
+    margin-right: 30px;
+}
+
+.middle-left {
+    width: 48%;
+    float: left;
+    padding-top: 40px;
+    padding-bottom: 20px;
+    font-family: sans-serif;
+}
+
+.middle-left > div {
+    margin-bottom: 5px;
+}
+
+.middle-left > div > span {
+    display: inline-block;
+}
+
+.middle-right {
+    width: 48%;
+    float: right;
+    padding-top: 40px;
+    padding-bottom: 20px;
+}
+
+.middle-label {
+    width: 120px;
+    font-weight: bold;
+    display: inline-block;
+    vertical-align: top;
+}
+
+html, body {
+    /*overflow-x: hidden;*/
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    text-align: center;
+    vertical-align: middle;
+    z-index: 1000;
+}
+
+#loading img {
+    width: 200px;
+    margin-top: 100px;
+}

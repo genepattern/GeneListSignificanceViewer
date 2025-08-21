@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="create-zip" name="GeneListSignificanceViewer">
+
+
+<property name="dirOffset" value="../common_module_code" />
+<import file="${dirOffset}/commontargets.xml" />
+
+
+
+<target name="create-zip" depends="init">
+    <antcall target="prezip"/>
+    <zip destfile="${dest.dir}/${ant.project.name}.zip" whenempty="fail" defaultexcludes="true">
+        <fileset dir="." includes="manifest, doc.html"/>
+        <fileset dir="." includes="gene_list_significance_viewer.html, ajax.gif"/>
+        <zipfileset dir="js" prefix="js" includes="*"/>
+        <zipfileset dir="css" prefix="css" includes="*.css"/>
+        <zipfileset dir="js/DataTables" prefix="js/DataTables" includes="*"/>
+        <zipfileset dir="js/DataTables/DataTables-1.10.12" prefix="js/DataTables/DataTables-1.10.12" includes="*"/>
+        <zipfileset dir="js/DataTables/jQuery-2.2.3" prefix="js/DataTables/jQuery-2.2.3" includes="*"/>
+    </zip>
+    <antcall target="postzip"/>
+</target>
+
+
+
+</project>
