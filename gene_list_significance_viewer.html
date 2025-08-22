@@ -58,29 +58,54 @@
 <body>
 
 <div id="error-message"></div>
+<div id="class-selector" style="margin: 20px 0; padding: 10px; background-color: #f5f5f5; border-radius: 5px;">
+  <label for="class-toggle">Select Class to Display: </label>
+  <select id="class-toggle">
+    <option value="class-1" selected>Class 1</option>
+    <option value="class-2">Class 2</option>
+  </select>
+</div>
+
 
 <div id="loading" style="display: none;"><img src="ajax.gif"></div>
 
-<div id="plot-div"></div>
-
-<div id="middle-div" style="padding-top:25px;padding-bottom:20px;">
-    
+<div id="class-1-container">
+    <div id="plot-div-1"></div>
+    <div id="middle-div-1" style="padding-top:25px;padding-bottom:20px;">
+    </div>
+    <div id="table-div-1" style="display: none;">
+        <table class="display">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Feature</th>
+                    <th>Description</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
 
-<div id="table-div" style="display: none;">
-    <table class="display">
-        <thead>
-            <tr>
-                <th>Row</th>
-                <th>Feature</th>
-                <th>Description</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+<div id="class-2-container" >
+    <div id="plot-div-2"></div>
+    <div id="middle-div-2" style="padding-top:25px;padding-bottom:20px;">
+    </div>
+    <div id="table-div-2" style="display: none;">
+        <table class="display">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Feature</th>
+                    <th>Description</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
-
 </body>
 </html>
 

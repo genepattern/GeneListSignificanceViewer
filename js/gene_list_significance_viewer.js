@@ -34,51 +34,72 @@ function loadOdfFile(pObj) {
     });
 }
 
-
-function addTableData(data, callThreshold) {
-    var table_div = $("#table-div");
+function addTableData(data, classIndex) {
+    var table_div = $("#table-div-"+classIndex);
     var tbody = table_div.find("tbody");
-
-    // Loop
+    var thead = table_div.find("thead");
+    
+    // Clear existing table headers
+    thead.empty();
+    
+    // Define additional fields in the correct order
+    var additionalFields = ["Perm 1%", "Perm 5%", "Perm (user)", "Mean0", "Std0", "Mean1", "Std1"];
+    
+    // Check if additional fields are present (check the first one)
+    var hasAdditionalFields = data[additionalFields[0]] !== undefined;
+    
+    // Create header row
+    var headerRow = $("<tr>");
+    
+    // Add standard column headers
+    headerRow.append($("<th>Row</th>"));
+    headerRow.append($("<th>Feature</th>"));
+    headerRow.append($("<th>Description</th>"));
+    headerRow.append($("<th>Score</th>"));
+    
+    // Add additional column headers if they exist
+    if (hasAdditionalFields) {
+        for (var j = 0; j < additionalFields.length; j++) {
+            headerRow.append($("<th></th>").append(additionalFields[j]));
+        }
+    }
+    
+    thead.append(headerRow);
+    
+    // Loop through data and add table rows
     for (var i = 0; data["Feature"].length > i; i++) {
         var rank = data["Row"][i];
         var feature = data["Feature"][i];
         var description = data["Description"][i];
         var score = data["Score"][i];
         
-
         var row = $("<tr>");
-
-        row.append(
-            $("<td></td>")
-                .append(rank)
-        );
-        row.append(
-            $("<td></td>")
-                .append(feature)
-        );
-        row.append(
-            $("<td></td>")
-                .append(description)
-        );
-        row.append(
-            $("<td></td>")
-                .append(score)
-        );
-     
-
+        
+        // Add standard columns
+        row.append($("<td></td>").append(rank));
+        row.append($("<td></td>").append(feature));
+        row.append($("<td></td>").append(description));
+        row.append($("<td></td>").append(score));
+        
+        // Add additional fields if they exist
+        if (hasAdditionalFields) {
+            for (var j = 0; j < additionalFields.length; j++) {
+                var fieldName = additionalFields[j];
+                var fieldValue = data[fieldName][i] !== undefined ? data[fieldName][i] : "";
+                row.append($("<td></td>").append(fieldValue));
+            }
+        }
+        
         tbody.append(row);
     }
-
     
     table_div.show();
+
 }
 
 
-
-
-function addPlotData(data, Plotly) {
-    $("#plot-div").empty();
+function addPlotData(data, Plotly, classIndex) {
+    $("#plot-div-"+classIndex).empty();
 
     var layout = {
         xaxis: {
@@ -144,21 +165,21 @@ function addPlotData(data, Plotly) {
 
     // Plot the data
     var plot_data = [barChart];
-    Plotly.newPlot('plot-div', plot_data, layout, config);
+    Plotly.newPlot('plot-div-'+classIndex, plot_data, layout, config);
     
     
     setTimeout(function() {
-        var plotSVG = $("#plot-div").find(".main-svg:first");
+        var plotSVG = $("#plot-div-"+classIndex).find(".main-svg:first");
         plotSVG.attr("height", 425);
         plotSVG.css("height", 425);
         plotSVG.parent().css("height", 400);
-        addDownloadButton();
+        addDownloadButton(classIndex);
     }, 10);
 }
 
-function displaySummary(data) {
+function displaySummary(data, classIndex) {
     // Find the middle div
-    const middleDiv = document.getElementById('middle-div');
+    const middleDiv = document.getElementById('middle-div-'+classIndex);
 
     // Clear any existing content
     middleDiv.innerHTML = '';
@@ -170,57 +191,99 @@ function displaySummary(data) {
     summaryTable.style.borderCollapse = 'collapse';
     summaryTable.style.border = '1px solid #ddd';
 
-    // Create header row with title spanning 2 columns
+    // Create header row with title spanning both columns
     const headerRow = document.createElement('tr');
     const headerCell = document.createElement('th');
     headerCell.textContent = 'Summary';
-    headerCell.colSpan = 2;
     headerCell.style.textAlign = 'center';
     headerCell.style.border = '1px solid #ddd';
     headerCell.style.padding = '8px';
+    headerCell.colSpan = 2;
     headerRow.appendChild(headerCell);
     summaryTable.appendChild(headerRow);
 
-    // Add row for Select Method and Gene Name
-    const row1 = document.createElement('tr');
-    
-    const cell1 = document.createElement('td');
-    cell1.innerHTML = 'Select Method:  ' + data.MarkerSelectionMethod;
-    cell1.style.border = '1px solid #ddd';
-    cell1.style.padding = '8px';
-    
-    const cell2 = document.createElement('td');
-    cell2.innerHTML = 'Gene Name:  ' + data.GeneName;
-    cell2.style.border = '1px solid #ddd';
-    cell2.style.padding = '8px';
-    
-    row1.appendChild(cell1);
-    row1.appendChild(cell2);
-    summaryTable.appendChild(row1);
+    if (data.GeneName) {
+        // Original format with GeneName field
+        // Add row for Select Method and Gene Name
+        const row1 = document.createElement('tr');
+        const cell1 = document.createElement('td');
+        cell1.innerHTML = 'Select Method:  ' + data.MarkerSelectionMethod;
+        cell1.style.border = '1px solid #ddd';
+        cell1.style.padding = '8px';
 
-    // Add row for Distance Function and Num Neighbors
-    const row2 = document.createElement('tr');
-    
-    const cell3 = document.createElement('td');
-    cell3.innerHTML = 'Distance Function:  ' + data.DistanceFunction;
-    cell3.style.border = '1px solid #ddd';
-    cell3.style.padding = '8px';
-    
-    const cell4 = document.createElement('td');
-    cell4.innerHTML = 'Num Neighbors:  ' + data.NumNeighbors;
-    cell4.style.border = '1px solid #ddd';
-    cell4.style.padding = '8px';
-    
-    row2.appendChild(cell3);
-    row2.appendChild(cell4);
-    summaryTable.appendChild(row2);
+        const cell2 = document.createElement('td');
+        cell2.innerHTML = 'Gene Name:  ' + data.GeneName;
+        cell2.style.border = '1px solid #ddd';
+        cell2.style.padding = '8px';
+
+        row1.appendChild(cell1);
+        row1.appendChild(cell2);
+        summaryTable.appendChild(row1);
+
+        // Add row for Distance Function and Num Neighbors
+        const row2 = document.createElement('tr');
+        const cell3 = document.createElement('td');
+        cell3.innerHTML = 'Distance Function:  ' + data.DistanceFunction;
+        cell3.style.border = '1px solid #ddd';
+        cell3.style.padding = '8px';
+
+        const cell4 = document.createElement('td');
+        cell4.innerHTML = 'Num Neighbors:  ' + data.NumNeighbors;
+        cell4.style.border = '1px solid #ddd';
+        cell4.style.padding = '8px';
+
+        row2.appendChild(cell3);
+        row2.appendChild(cell4);
+        summaryTable.appendChild(row2);
+    } else {
+        // Alternative format with 7 fields - display in 2 columns
+        // Fields to display in order
+        const fields = [
+            { label: 'Select Method', key: 'MarkerSelectionMethod' },
+            { label: 'Distance Function', key: 'DistanceFunction' },
+            { label: 'Num Neighbors', key: 'NumNeighbors' },
+            { label: 'Class Estimate', key: 'ClassEstimate' },
+            { label: 'User Significance Level', key: 'UserSigLevel' },
+            { label: 'Num Permutations', key: 'NumPermutations' },
+            { label: 'Num Distinct Permutations', key: 'NumDistinctPermutations' }
+        ];
+
+        // Create rows with 2 fields per row
+        for (let i = 0; i < fields.length; i += 2) {
+            const row = document.createElement('tr');
+            
+            // Add first cell
+            const cell1 = document.createElement('td');
+            cell1.innerHTML = fields[i].label + ':  ' + (data[fields[i].key] || 'N/A');
+            cell1.style.border = '1px solid #ddd';
+            cell1.style.padding = '8px';
+            row.appendChild(cell1);
+            
+            // Add second cell if it exists
+            if (i + 1 < fields.length) {
+                const cell2 = document.createElement('td');
+                cell2.innerHTML = fields[i+1].label + ':  ' + (data[fields[i+1].key] || 'N/A');
+                cell2.style.border = '1px solid #ddd';
+                cell2.style.padding = '8px';
+                row.appendChild(cell2);
+            } else {
+                // Add empty cell for the last odd item
+                const emptyCell = document.createElement('td');
+                emptyCell.style.border = '1px solid #ddd';
+                emptyCell.style.padding = '8px';
+                row.appendChild(emptyCell);
+            }
+            
+            summaryTable.appendChild(row);
+        }
+    }
 
     // Add the table to the middle div
     middleDiv.appendChild(summaryTable);
 }
 
-function addDownloadButton() {
-    var plotDiv = $("#plot-div");
+function addDownloadButton(classIndex) {
+    var plotDiv = $("#plot-div-"+classIndex);
 
     // Add the button
     var downloadButton = $('<button><i class="fa fa-download" aria-hidden="true"></i> PNG</button>')
@@ -228,7 +291,7 @@ function addDownloadButton() {
         .css("right", 10)
         .css("z-index", 64000)
         .click(function() {
-            var svg = $("#plot-div").find(".main-svg:first")[0];
+            var svg = $("#plot-div-"+classIndex).find(".main-svg:first")[0];
             var canvas = document.getElementById('download-canvas');
             var ctx = canvas.getContext('2d');
             var data = (new XMLSerializer()).serializeToString(svg);
@@ -258,7 +321,7 @@ function addDownloadButton() {
 
     // Add the canvas
     var downloadCanvas = $('<canvas></canvas>')
-        .attr("id", "download-canvas")
+        .attr("id", "download-canvas-" + classIndex)
         .css("width", $(document).width() - 150)
         .css("height", 550)
         .hide();
@@ -280,40 +343,57 @@ function triggerDownload (imgURI) {
     a.dispatchEvent(evt);
 }
 
+function setupClassToggle() {
+  // Function to toggle visibility
+  function toggleClassDisplay() {
+    if ($("#class-toggle").val() === 'class-1') {
+      $("#class-1-container").show();
+      $("#class-2-container").hide();
+    } else {
+      $("#class-1-container").hide();
+      $("#class-2-container").show();
+    }
+  }
+  
+  // Set initial state (redundant with HTML but good practice)
+  toggleClassDisplay();
+  
+  // Add event listener
+  $("#class-toggle").on('change', toggleClassDisplay);
+}
 
 // Update the selection functionality to store row numbers correctly
-function addSelectionFunctionality(Plotly) {
+function addSelectionFunctionality(Plotly, classIndex) {
     // Add CSS for selected rows
     $("<style>")
         .prop("type", "text/css")
-        .html("#table-div tbody tr.selected { background-color: rgba(255, 165, 0, 0.3) !important; }")
+        .html("#table-div-" + classIndex + " tbody tr.selected { background-color: rgba(255, 165, 0, 0.3) !important; }")
         .appendTo("head");
 
     // Add click handler to table rows
-    $("#table-div tbody").on("click", "tr", function() {
+    $("#table-div-" + classIndex + " tbody").on("click", "tr", function() {
         // Toggle selected class
         $(this).toggleClass("selected");
 
         // Get all selected row numbers (ranks)
         var selectedRows = [];
-        $("#table-div tbody tr.selected").each(function() {
+        $("#table-div-" + classIndex + " tbody tr.selected").each(function() {
             selectedRows.push(parseInt($(this).find("td:first").text().trim()));
         });
 
         // Update plot highlighting
-        updatePlotHighlighting(selectedRows, Plotly);
+        updatePlotHighlighting(selectedRows, Plotly, classIndex);
     });
 }
 
 // Fix the plot highlighting function to correctly match row numbers
-function updatePlotHighlighting(selectedRows, Plotly) {
+function updatePlotHighlighting(selectedRows, Plotly, classIndex) {
     // Get the plot div
-    var plotDiv = document.getElementById('plot-div');
+    var plotDiv = document.getElementById('plot-div-'+classIndex);
 
     // Exit if there's no plot
     if (!plotDiv || !plotDiv._fullData || plotDiv._fullData.length === 0) return;
-
-    // Access the plot data correctly
+    
     var plotData = plotDiv._fullData[0];
     var yValues = plotData.y; // These are the row numbers (ranks)
 
@@ -338,58 +418,49 @@ function updatePlotHighlighting(selectedRows, Plotly) {
     }
 
     // Update the plot layout with new shapes
-    Plotly.relayout('plot-div', {shapes: shapes});
+    Plotly.relayout('plot-div-'+classIndex, {shapes: shapes});
 }
 
 function processData(data) {
-   var descField = "Description";
+    var descField = "Description";
     if (!data["Description"] && data["Desc"]) {
         descField = "Desc";
-        data["plotNegativeScore"] = true;// for Class Neighbors plot negative, but show positive in table
-    }
-    
-    var feature_objects = [];
-    for (var i = 0; data["Feature"].length > i; i++) {
-        feature_objects.push({
-            "Row": i,
-            "Feature": data["Feature"][i],
-            "Score": data["Score"][i],
-             "Description": data[descField] ? data[descField][i] : ""
-        });
+        data["plotNegativeScore"] = true; // for Class Neighbors plot negative, but show positive in table
     }
 
-    // Sort objects by row
-    feature_objects.sort(function(a, b) {
-        if (a.Row > b.Row) return 1;
-        if (a.Row < b.Row) return -1;
-        // If counts are equal, sort by Feature Name
-        return 0;
-    });
+    // Ensure all fields exist and initialize empty arrays if necessary
+    data["Row"] = [];
+    data["Feature"] = data["Feature"] || [];
+    data["Description"] = data[descField] || [];
+    data["Score"] = data["Score"] || [];
 
-    // Create new arrays and assign back to data
-    var features = [];
-    var descriptions = [];
-    var scores =[];
-    var rows =[];
-  
-    for (var i = 0; feature_objects.length > i; i++) {
-        var obj = feature_objects[i];
-        features.push(obj["Feature"]);
-        descriptions.push(obj["Description"]);
-        scores.push(obj["Score"]);
-        rows.push(i)
+    // Process and assign data directly
+    for (var i = 0; i < data["Feature"].length; i++) {
+        data["Row"].push(i);
+        data["Description"][i] = data["Description"][i] || ""; // Default to empty string if missing
     }
-    data["Feature"] = features;
-    data["Description"] = descriptions;
-    data["Score"] = scores;
-    data["Row"] = rows;
-    
+
     return data;
 }
 
-requirejs(["jquery", "plotly", "gp_util", "gp_lib", "DataTables/datatables.min", "jquery-ui", "js.cookie"],
-    function($, Plotly, gpUtil, gpLib, datatables) {
-
+requirejs.config({
+    paths: {
+        'datatables': 'DataTables/datatables.min'
+    },
+    shim: {
+        'datatables': {
+            deps: ['jquery'],
+            exports: '$.fn.DataTable'
+        }
+    }
+});
+requirejs(["jquery", "plotly", "gp_util", "gp_lib", "datatables", "jquery-ui", "js.cookie"],
+    function($, Plotly, gpUtil, gpLib) {
+    if ($.fn.DataTable) {
+        console.log("DataTables is loaded.");
+    } else {
+        console.error("DataTables failed to load.");
+    }
     var requestParams = gpUtil.parseQueryString();
 
     // Verify necessary input
@@ -417,20 +488,22 @@ requirejs(["jquery", "plotly", "gp_util", "gp_lib", "DataTables/datatables.min",
             // Hide the loading screen
             $("#loading").hide();
 
+            var classIndex = 1;
             // Assemble the plot
-            addPlotData(data, Plotly, 0);
-            displaySummary(data) 
+            addPlotData(data, Plotly, classIndex);
+            displaySummary(data,classIndex) 
            
             // Assemble the table
-            addTableData(data, 0);
-            $("#table-div table").DataTable({
+            addTableData(data, classIndex);
+                $("#table-div-"+classIndex+" table").DataTable({
                 "pageLength": 50,
                 "order": [
                    
                     [0, "asc"]   // sort by the first column (Row) in ascending order
                 ]
             });
-            addSelectionFunctionality(Plotly);
+            addSelectionFunctionality(Plotly, classIndex);
+            setupClassToggle();
         },
         error: function(message) {
             $("#loading").hide();
