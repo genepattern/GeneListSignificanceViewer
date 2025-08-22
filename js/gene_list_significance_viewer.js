@@ -97,7 +97,6 @@ function addTableData(data, classIndex) {
 
 }
 
-
 function addPlotData(data, Plotly, classIndex) {
     $("#plot-div-"+classIndex).empty();
 
@@ -139,7 +138,7 @@ function addPlotData(data, Plotly, classIndex) {
     for (var i = 0; i < data["Feature"].length; i++) {
         hoverText.push(data["Feature"][i] + "<br>" + data["Description"][i]);
     }
-    
+
     if (data["plotNegativeScore"] == true) {
         // If plotNegativeScore is true, invert the scores for plotting
         xdata = data["Score"].map(function(score) {
@@ -148,9 +147,9 @@ function addPlotData(data, Plotly, classIndex) {
     } else {
         xdata = data["Score"];
     }
-    
-    // Create a simple bar chart
-    var barChart = {
+
+    // Create a scatter plot for the main data
+    var mainScatter = {
         x: xdata,
         y: data["Row"],
         type: 'scatter',
@@ -159,21 +158,60 @@ function addPlotData(data, Plotly, classIndex) {
             size: 10,
             color: 'rgba(255, 0, 0, 0.7)'
         },
-        text: hoverText ,
-        hoverinfo: 'x+y+text'
+        text: hoverText,
+        hoverinfo: 'x+y+text',
+        name: 'Score'
     };
 
+    // Initialize plot_data array with the main scatter plot
+    var plot_data = [mainScatter];
+
+    // Add threshold traces if they exist
+    var thresholds = [
+        { field: "Perm 1%", color: 'blue', name: 'Perm 1%' },
+        { field: "Perm 5%", color: '#45ACAA', name: 'Perm 5%' },
+        { field: "Perm (user)", color: 'black', name: 'Perm (user)' }
+    ];
+
+    thresholds.forEach(function(threshold) {
+        if (data[threshold.field] !== undefined && data[threshold.field].length > 0) {
+            // Create x data for this threshold
+            var thresholdXData;
+            if (data["plotNegativeScore"] == true) {
+                thresholdXData = data[threshold.field].map(function(val) {
+                    return -val; // Invert if needed
+                });
+            } else {
+                thresholdXData = data[threshold.field];
+            }
+
+            // Create a scatter trace for this threshold
+            var thresholdTrace = {
+                x: thresholdXData,
+                y: data["Row"],
+                type: 'scatter',
+                mode: 'lines',
+                line: {
+                    color: threshold.color,
+                    width: 2
+                },
+                name: threshold.name
+            };
+
+            // Add to plot data
+            plot_data.push(thresholdTrace);
+        }
+    });
+
     // Plot the data
-    var plot_data = [barChart];
     Plotly.newPlot('plot-div-'+classIndex, plot_data, layout, config);
-    
-    
+
     setTimeout(function() {
         var plotSVG = $("#plot-div-"+classIndex).find(".main-svg:first");
         plotSVG.attr("height", 425);
         plotSVG.css("height", 425);
         plotSVG.parent().css("height", 400);
-        addDownloadButton(classIndex);
+        addDownloadButton(classIndex, Plotly);
     }, 10);
 }
 
@@ -282,53 +320,34 @@ function displaySummary(data, classIndex) {
     middleDiv.appendChild(summaryTable);
 }
 
-function addDownloadButton(classIndex) {
-    var plotDiv = $("#plot-div-"+classIndex);
 
+
+function addDownloadButton(classIndex, Plotly) {
+    var plotDiv = $("#plot-div-"+classIndex);
+    
     // Add the button
     var downloadButton = $('<button><i class="fa fa-download" aria-hidden="true"></i> PNG</button>')
         .css("position", "absolute")
         .css("right", 10)
         .css("z-index", 64000)
         .click(function() {
-            var svg = $("#plot-div-"+classIndex).find(".main-svg:first")[0];
-            var canvas = document.getElementById('download-canvas');
-            var ctx = canvas.getContext('2d');
-            var data = (new XMLSerializer()).serializeToString(svg);
-            var DOMURL = window.URL || window.webkitURL || window;
-
-            var img = new Image();
-            var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-            var url = DOMURL.createObjectURL(svgBlob);
-
-            canvas.width = 1300;
-            canvas.height = 475;
-
-            img.onload = function () {
-                ctx.drawImage(img, 0, 0);
-                DOMURL.revokeObjectURL(url);
-
-                var imgURI = canvas
-                    .toDataURL('image/png')
-                    .replace('image/png', 'image/octet-stream');
-
-                triggerDownload(imgURI);
-            };
-
-            img.src = url;
+            // Get direct reference to the plot
+            var plotElement = document.getElementById('plot-div-'+classIndex);
+            
+            // Use Plotly's downloadImage function which handles everything
+            Plotly.downloadImage(plotElement, {
+                format: 'png',
+                width: 1300,
+                height: 650,
+                filename: 'GeneListSignificanceResults',
+                scale: 2  // Higher resolution
+            });
         });
+    
     plotDiv.prepend(downloadButton);
-
-    // Add the canvas
-    var downloadCanvas = $('<canvas></canvas>')
-        .attr("id", "download-canvas-" + classIndex)
-        .css("width", $(document).width() - 150)
-        .css("height", 550)
-        .hide();
-    plotDiv.append(downloadCanvas);
 }
 
-function triggerDownload (imgURI) {
+function triggerDownload(imgURI) {
     var evt = new MouseEvent('click', {
         view: window,
         bubbles: false,
@@ -361,7 +380,27 @@ function setupClassToggle() {
   // Add event listener
   $("#class-toggle").on('change', toggleClassDisplay);
 }
-
+function updateClassToggleLabels(uniqueClasses) {
+  // Get the dropdown element
+  const classToggle = document.getElementById('class-toggle');
+  
+  // Clear existing options
+  classToggle.innerHTML = '';
+  
+  // Add new options with "Markers of <classname>" format
+  for (let i = 0; i < uniqueClasses.length; i++) {
+    const option = document.createElement('option');
+    option.value = 'class-' + (i + 1);
+    option.textContent = 'Markers of ' + uniqueClasses[i];
+    
+    // Select the first option by default
+    if (i === 0) {
+      option.selected = true;
+    }
+    
+    classToggle.appendChild(option);
+  }
+}
 // Update the selection functionality to store row numbers correctly
 function addSelectionFunctionality(Plotly, classIndex) {
     // Add CSS for selected rows
@@ -443,6 +482,60 @@ function processData(data) {
     return data;
 }
 
+function splitDataByClass(data) {
+    // Check if Class array exists
+    if (!data['Class'] || data['Class'].length === 0) {
+        console.error("Class array is missing or empty");
+        return null;
+    }
+
+    // Find the two unique class values
+    const uniqueClasses = [...new Set(data['Class'])];
+
+    if (uniqueClasses.length !== 2) {
+        console.error("Expected exactly 2 unique classes, found " + uniqueClasses.length);
+        return null;
+    }
+
+    // Create result objects for each class
+    const result = {};
+    result[uniqueClasses[0]] = {}; // Use actual class name as key
+    result[uniqueClasses[1]] = {}; // Use actual class name as key
+
+    // Copy non-array properties to both objects
+    for (const key in data) {
+        if (!Array.isArray(data[key])) {
+            result[uniqueClasses[0]][key] = data[key];
+            result[uniqueClasses[1]][key] = data[key];
+        }
+    }
+
+    // Initialize arrays in result objects
+    for (const key in data) {
+        if (Array.isArray(data[key]) && key !== 'Class') {
+            result[uniqueClasses[0]][key] = [];
+            result[uniqueClasses[1]][key] = [];
+        }
+    }
+
+    // Split array fields based on class values
+    for (let i = 0; i < data['Class'].length; i++) {
+        const classValue = data['Class'][i]; // Use the actual class value
+
+        for (const key in data) {
+            if (Array.isArray(data[key]) && key !== 'Class') {
+                result[classValue][key].push(data[key][i]);
+            }
+        }
+    }
+
+    // Create new Row arrays with sequential indices
+    result[uniqueClasses[0]]['Row'] = Array.from({length: result[uniqueClasses[0]]['Feature'].length}, (_, i) => i);
+    result[uniqueClasses[1]]['Row'] = Array.from({length: result[uniqueClasses[1]]['Feature'].length}, (_, i) => i);
+
+    return result;
+}
+
 requirejs.config({
     paths: {
         'datatables': 'DataTables/datatables.min'
@@ -488,22 +581,52 @@ requirejs(["jquery", "plotly", "gp_util", "gp_lib", "datatables", "jquery-ui", "
             // Hide the loading screen
             $("#loading").hide();
 
-            var classIndex = 1;
-            // Assemble the plot
-            addPlotData(data, Plotly, classIndex);
-            displaySummary(data,classIndex) 
-           
-            // Assemble the table
-            addTableData(data, classIndex);
-                $("#table-div-"+classIndex+" table").DataTable({
-                "pageLength": 50,
-                "order": [
+            if (data['Class'] && data['Class'].length > 1) {
+                const uniqueClasses = [...new Set(data['Class'])];
+                dataDict = splitDataByClass(data);
+                
+                let classIndex = 1;
+                for (let classname of uniqueClasses) {
+                   var dataForClass = dataDict[classname];
                    
-                    [0, "asc"]   // sort by the first column (Row) in ascending order
-                ]
-            });
-            addSelectionFunctionality(Plotly, classIndex);
-            setupClassToggle();
+                   // Assemble the plot
+                   addPlotData(dataForClass, Plotly, classIndex);
+                   displaySummary(dataForClass, classIndex)
+
+                   // Assemble the table
+                   addTableData(dataForClass, classIndex);
+                   $("#table-div-" + classIndex + " table").DataTable({
+                       "pageLength": 50,
+                       "order": [
+
+                           [0, "asc"]   // sort by the first column (Row) in ascending order
+                       ]
+                   });
+                   addSelectionFunctionality(Plotly, classIndex);
+                   updateClassToggleLabels(uniqueClasses);
+                   classIndex++;
+               }
+                setupClassToggle();
+            } else {
+                $("#class-selector").hide();
+                var classIndex = 1;
+                // Assemble the plot
+                addPlotData(data, Plotly, classIndex);
+                displaySummary(data,classIndex) 
+               
+                // Assemble the table
+                addTableData(data, classIndex);
+                    $("#table-div-"+classIndex+" table").DataTable({
+                    "pageLength": 50,
+                    "order": [
+                       
+                        [0, "asc"]   // sort by the first column (Row) in ascending order
+                    ]
+                });
+                addSelectionFunctionality(Plotly, classIndex);
+            }
+            
+            
         },
         error: function(message) {
             $("#loading").hide();
