@@ -100,9 +100,11 @@ function addTableData(data, classIndex) {
 function addPlotData(data, Plotly, classIndex) {
     $("#plot-div-"+classIndex).empty();
 
+    var xAxisTitle = data["plotNegativeScore"] == true ? "Score (*-1)" : "Score";
+
     var layout = {
         xaxis: {
-            title: "Score",
+            title: xAxisTitle,
             showgrid: true,
             showline: true,
             zeroline: false
