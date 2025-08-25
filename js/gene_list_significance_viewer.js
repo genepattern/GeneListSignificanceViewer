@@ -385,7 +385,8 @@ function setupClassToggle() {
 function updateClassToggleLabels(uniqueClasses) {
   // Get the dropdown element
   const classToggle = document.getElementById('class-toggle');
-  
+  const classSelector = document.getElementById('class-selector');
+
   // Clear existing options
   classToggle.innerHTML = '';
   
@@ -401,6 +402,11 @@ function updateClassToggleLabels(uniqueClasses) {
     }
     
     classToggle.appendChild(option);
+  }
+   if (uniqueClasses.length > 1) {
+    classSelector.style.display = 'block';
+  } else {
+    classSelector.style.display = 'none';
   }
 }
 // Update the selection functionality to store row numbers correctly
